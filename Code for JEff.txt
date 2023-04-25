@@ -107,6 +107,7 @@ if(volume_projected >= 1000000000)
 
 
 // Display Table
+tfDaily = timeframe.isdaily
 table t = table.new(position.top_right, 2, 10, bgcolor=bg_col)
 if barstate.islast and timeframe.period != "W" and timeframe.period != "M"
     if show_empty_row
@@ -128,10 +129,10 @@ if barstate.islast and timeframe.period != "W" and timeframe.period != "M"
         table.cell(t, 0, 5, "LoD dist.", text_color=txt_col)
         table.cell(t, 1, 5, str.tostring(math.round(lod_dist)) + "%", text_color=txt_col)
     if show_ADVS
-        table.cell(t, 0, 6, "Avg Dly $ Vol", text_color=txt_col)
+        table.cell(t, 0, 6, tfDaily ? "Avg Dly $ Vol":"Avg $ Vol", text_color=txt_col)
         table.cell(t, 1, 6, '$' + str.tostring(math.round(advdolDa, 2), '0.00') + uVDoll, text_color=txt_col)
     if show_ADV
-        table.cell(t, 0, 7, "Avg Dly Vol", text_color=txt_col)
+        table.cell(t, 0, 7, tfDaily ? "Avg Dly Vol":"Avg Vol", text_color=txt_col)
         table.cell(t, 1, 7, str.tostring(math.round(avgDaVol, 2), '0.00') + uV, text_color=txt_col)
     if show_projectedVol
         table.cell(t, 0, 8, "Proj. Vol", text_color=txt_col)
