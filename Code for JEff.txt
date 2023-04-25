@@ -28,8 +28,7 @@ adrp = request.security(syminfo.tickerid, 'D', arp)
 atr = request.security(syminfo.tickerid, 'D', ta.atr(atr_len))
 lod_dist = request.security(syminfo.tickerid, 'D', 100 * (close - low) / atr)
 
-// For Jeff
-// i just want to an additional row of 1) Relative Volume 2) Average Daily Vol and 3)Average Daily $ Vol 4) Market Cap for the same script as option
+
 // Volume calculation
 
 tf = timeframe.period
@@ -39,7 +38,7 @@ ma = ta.sma(vol, len)
 // 1) Relative Volume
 relVol = vol/ma*100
 // 2) Average Daily Vol
-avgDaVol = request.security(syminfo.tickerid, 'D', ma)
+avgDaVol = request.security(s, tf, ma)
 avgDaVolCalc = avgDaVol
 uV = ''
 if(avgDaVol >= 1000 and avgDaVol < 1000000)
@@ -52,7 +51,7 @@ if(avgDaVol >= 1000000000)
     avgDaVol := avgDaVol/1000000000
     uV := 'B'
 // 3) Average Daily $ Vol
-closeDa = request.security(syminfo.tickerid, 'D', close)
+closeDa = request.security(s, tf, close)
 advdolDa = closeDa*avgDaVolCalc
 uVDoll = ''
 if(advdolDa >= 1000 and advdolDa < 1000000)
@@ -65,7 +64,7 @@ if(advdolDa >= 1000000000)
     advdolDa := advdolDa/1000000000
     uVDoll := 'B'
 // 4)  Market Cap
-TSO = request.financial(syminfo.tickerid, 'TOTAL_SHARES_OUTSTANDING', 'FQ', ignore_invalid_symbol=true)
+TSO = request.financial(s, 'TOTAL_SHARES_OUTSTANDING', 'FQ', ignore_invalid_symbol=true)
 MCap = TSO*closeDa
 MCapCalc = MCap
 uM = ''
@@ -79,7 +78,7 @@ if(MCap >= 1000000000)
     MCap := MCap/1000000000
     uM := 'B'
 // 5) Float%
-FSO = request.financial(syminfo.tickerid, 'FLOAT_SHARES_OUTSTANDING', 'FY', ignore_invalid_symbol=true)
+FSO = request.financial(s, 'FLOAT_SHARES_OUTSTANDING', 'FY', ignore_invalid_symbol=true)
 FFMCap = FSO * closeDa
 floatPer = FFMCap/MCapCalc*100
 // 6) Projected Volume
