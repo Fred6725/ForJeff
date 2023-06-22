@@ -8,7 +8,7 @@ indicator(title="ATR% mulitple from 50-MA", overlay=true, max_labels_count = 500
 atr_len     = input(14, title="ATR Length", tooltip="The number of daily bars used in the calculation of the ATR")
 len         = input(50, title="MA length", tooltip="The lenght of the MA used for calculation")
 thresold    = input(6, title = "Multiple ATR for detection", tooltip="Above this ATR multiple between close and MA50 Daily, the candles will be marked")
-ShapeOrChar = input.string("Normal", title="Size of the Dot", options=["Normal", "Tiny"])
+ShapeOrChar = input.string("Tiny", title="Size of the Dot", options=["Normal", "Tiny"])
 dotCol      = input(color.yellow, title = "Dots Color")
 
 
