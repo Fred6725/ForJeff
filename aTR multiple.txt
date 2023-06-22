@@ -23,7 +23,7 @@ sma50   = request.security(syminfo.tickerid, 'D', ta.sma(close, len))
 dist = (closeDa - sma50) / atr
 
 // 5) Condition
-bool cond = dist > 6 ? 1:0
+bool cond = dist > thresold ? 1:0
 
 // 6) Display
 // Shape Display
