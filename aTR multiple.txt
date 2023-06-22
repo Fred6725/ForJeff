@@ -1,0 +1,34 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © Fred6724
+
+//@version=5
+indicator(title="ATR% mulitple from 50-MA", overlay=true, max_labels_count = 500)
+
+// 1) Inputs
+atr_len     = input(14, title="ATR Length", tooltip="The number of daily bars used in the calculation of the ATR")
+len         = input(50, title="MA length", tooltip="The lenght of the MA used for calculation")
+thresold    = input(6, title = "Multiple ATR for detection", tooltip="Above this ATR multiple between close and MA50 Daily, the candles will be marked")
+ShapeOrChar = input.string("Normal", title="Size of the Dot", options=["Normal", "Tiny"])
+dotCol      = input(color.yellow, title = "Dots Color")
+
+
+// 2) ATR Calculation
+atr     = request.security(syminfo.tickerid, 'D', ta.atr(atr_len))
+
+// 3) MA Calculation
+closeDa = request.security(syminfo.tickerid, 'D', close)
+sma50   = request.security(syminfo.tickerid, 'D', ta.sma(close, len))
+
+// 4) Distance Multiple calculation
+dist = (closeDa - sma50) / atr
+
+// 5) Condition
+bool cond = dist > 6 ? 1:0
+
+// 6) Display
+// Shape Display
+if(cond and ShapeOrChar == "Normal")
+    label.new(bar_index, high, yloc = yloc.abovebar, style=label.style_circle, size = size.tiny, color = dotCol)
+
+// Char Display
+plotchar(cond and ShapeOrChar == "Tiny" ? close:na, char = "•", color = dotCol, size = size.small)
