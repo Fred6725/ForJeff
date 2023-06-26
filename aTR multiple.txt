@@ -2,33 +2,52 @@
 // © Fred6724
 
 //@version=5
-indicator(title="ATR% mulitple from 50-MA", overlay=true, max_labels_count = 500)
+indicator(title="ATR% multiple from 50-MA", overlay=true, max_labels_count = 500)
 
 // 1) Inputs
 atr_len     = input(14, title="ATR Length", tooltip="The number of daily bars used in the calculation of the ATR")
 len         = input(50, title="MA length", tooltip="The lenght of the MA used for calculation")
-thresold    = input(6, title = "Multiple ATR for detection", tooltip="Above this ATR multiple between close and MA50 Daily, the candles will be marked")
-ShapeOrChar = input.string("Tiny", title="Size of the Dot", options=["Normal", "Tiny"])
+thresold    = input(10, title = "Multiple ATR for detection", tooltip="Above this ATR multiple between close and MA50 Daily, the candles will be marked")
+ShapeOrChar = input.string("tiny", title="Size of the Dot", options=["normal", "tiny"])
 dotCol      = input(color.yellow, title = "Dots Color")
+table       = input(true, title="Display Info Table", group = "table")
+txt_col     = input(color.orange, title="Table Text Color", group = "table")
+twt_ext     = input(color.red, title="Extended Text Color", group = "table")
+tbl_size    = input.string(size.normal, title='Table Size', options=[size.tiny,size.small,size.normal, size.large])
 
+// 2) Calculation
+closeDa              = request.security(syminfo.tickerid, 'D', close)
+highDa               = request.security(syminfo.tickerid, 'D', high)
+atr                  = request.security(syminfo.tickerid, 'D', ta.atr(atr_len))
+atrpercent           = (atr/closeDa) * 100
+sma50                = request.security(syminfo.tickerid, 'D', ta.sma(close, len))
+// Calulation using the daily close
+percentGainFromSMA   = (closeDa/sma50 - 1) * 100
+atrMultipleFromeSma  = percentGainFromSMA / atrpercent
+// Here we will use another variable which does the same calculation as above but with the high of the candle instead of the close.
+// This way, when the stocks is extended above an atr% multiple of 10 and is resold below this threshold, the dot on the screen remains.
+percentGainFromSMAH  = (highDa/sma50 - 1) * 100
+atrMultipleFromeSmaH = percentGainFromSMAH / atrpercent
 
-// 2) ATR Calculation
-atr     = request.security(syminfo.tickerid, 'D', ta.atr(atr_len))
+// 3) Condition
+bool cond = atrMultipleFromeSmaH >= thresold ? 1:0
 
-// 3) MA Calculation
-closeDa = request.security(syminfo.tickerid, 'D', close)
-sma50   = request.security(syminfo.tickerid, 'D', ta.sma(close, len))
-
-// 4) Distance Multiple calculation
-dist = (closeDa - sma50) / atr
-
-// 5) Condition
-bool cond = dist > thresold ? 1:0
-
-// 6) Display
+// 4) Display
+// The circle shape seems to big for me. I made that when the user selects the size it will choose the smallest size of the label or a char display.
 // Shape Display
-if(cond and ShapeOrChar == "Normal")
+if(cond and ShapeOrChar == "normal")
     label.new(bar_index, high, yloc = yloc.abovebar, style=label.style_circle, size = size.tiny, color = dotCol)
-
 // Char Display
-plotchar(cond and ShapeOrChar == "Tiny" ? close:na, char = "•", color = dotCol, size = size.small)
+plotchar(cond and ShapeOrChar == "tiny" ? close:na, char = "•", color = dotCol, size = size.small)
+
+
+// 5) Display Table
+tfDaily = timeframe.isdaily
+table t = table.new(position.bottom_right, 2, 4, bgcolor=color.rgb(255,255,255,100))
+if barstate.islast and timeframe.period != "W" and timeframe.period != "M" and table
+    table.cell(t, 0, 0, "ATR% Multiple From MA  ", text_color=txt_col, text_size = tbl_size)
+    table.cell(t, 1, 0, str.tostring(math.round(atrMultipleFromeSma, 2)), text_color=atrMultipleFromeSma>=10 ? twt_ext:txt_col, text_size = tbl_size)
+    table.cell(t, 0, 1, "% Gain From MA   ", text_color=txt_col, text_size = tbl_size)
+    table.cell(t, 1, 1, str.tostring(math.round(percentGainFromSMA, 2)) + "%", text_color=txt_col, text_size = tbl_size)
+    table.cell(t, 0, 2, "ATR %      ", text_color=txt_col, text_size = tbl_size)
+    table.cell(t, 1, 2, str.tostring(math.round(atrpercent, 2), '0.00') + '%', text_color=txt_col, text_size = tbl_size)
