@@ -46,7 +46,7 @@ tfDaily = timeframe.isdaily
 table t = table.new(position.bottom_right, 2, 4, bgcolor=color.rgb(255,255,255,100))
 if barstate.islast and timeframe.period != "W" and timeframe.period != "M" and table
     table.cell(t, 0, 0, "ATR% Multiple From MA  ", text_color=txt_col, text_size = tbl_size)
-    table.cell(t, 1, 0, str.tostring(math.round(atrMultipleFromeSma, 2)), text_color=atrMultipleFromeSma>=10 ? twt_ext:txt_col, text_size = tbl_size)
+    table.cell(t, 1, 0, str.tostring(math.round(atrMultipleFromeSma, 2)), text_color=atrMultipleFromeSma>=thresold ? twt_ext:txt_col, text_size = tbl_size)
     table.cell(t, 0, 1, "% Gain From MA   ", text_color=txt_col, text_size = tbl_size)
     table.cell(t, 1, 1, str.tostring(math.round(percentGainFromSMA, 2)) + "%", text_color=txt_col, text_size = tbl_size)
     table.cell(t, 0, 2, "ATR %      ", text_color=txt_col, text_size = tbl_size)
