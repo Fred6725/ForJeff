@@ -5,7 +5,7 @@
 // latest update with clean chart
 
 //@version=5
-indicator(title = "Swing Data - ADR% / RVol / PVol / Float % / Avg $ Vol", shorttitle="ADR% / RVol / PVol / Float % / Avg $ Vol", overlay=true)
+indicator(title="ADR% / RVol / PVol / Float % / Avg $ Vol", overlay=true)
 
 
 show_mktCap = input(true, title="Show Market Cap")
