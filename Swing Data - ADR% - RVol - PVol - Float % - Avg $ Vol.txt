@@ -33,8 +33,8 @@ atr_len           = input(14, title='ATR Length', group = 'Parameters', tooltip=
 len               = input(50, 'Volume MA Length', group = 'Parameters', tooltip='The number of bars back for the MA calculation of the volume')
 posTable          = input.string(defval='Top Right', title='Table Position', options=['Top Left', 'Top Right', 'Bottom Left', 'Bottom Right'], group = 'Table')
 tbl_size          = input.string('Normal', title='Table Size', options=['Tiny', 'Small', 'Normal', 'Large'], group = 'Table')
-txt_align_left    = input.string('Left', title='Left Column Text Align', options=['Left', 'Center', 'Right'], group = 'Table')
-txt_align_right   = input.string('Right', title='Right Column Text Align', options=['Left', 'Center', 'Right'], group = 'Table')
+txt_align_left    = input.string('Center', title='Left Column Text Align', options=['Left', 'Center', 'Right'], group = 'Table')
+txt_align_right   = input.string('Center', title='Right Column Text Align', options=['Left', 'Center', 'Right'], group = 'Table')
 bg_col            = input(#00000000, title='Background Color', group = 'Table')
 txt_col           = input(color.orange, title='Text Color', group = 'Table')
 
