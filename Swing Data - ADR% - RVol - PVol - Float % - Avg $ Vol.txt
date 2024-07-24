@@ -4,6 +4,7 @@
 // TheScrutiniser and GlinckEastwoot for ADR% formula
 // latest update with clean chart
 
+
 //@version=5
 indicator(title = 'Swing Data - ADR% / RVol / PVol / Float % / Avg $ Vol', shorttitle='ADR% / RVol / PVol / Float % / Avg $ Vol', overlay=true, max_bars_back = 253)
 
@@ -18,8 +19,8 @@ show_lod_dist     = input(true, title='Show LoD dist.', group = 'Display')
 show_lod_price    = input(true, title='Show LoD Price', group = 'Display')
 show_dist_high    = input(true, title='Show %dist of 52 We High', group = 'Display')
 show_dist_low     = input(true, title='Show %dist of 52 We Low', group = 'Display')
-show_ADVS         = input(true, title='Show Avg Daily $ Volume', group = 'Display')
-show_ADV          = input(true, title='Show Avg Daily Volume', group = 'Display')
+show_ADVS         = input(true, title='Show Avg $ Volume', group = 'Display')
+show_ADV          = input(true, title='Show Avg Volume', group = 'Display')
 show_projectedVol = input(true, title='Show Projected Volumes', group = 'Display')
 show_relVol       = input(true, title='Show Relative Volume', group = 'Display')
 show_volBuzz      = input(true, title='Show Vol. Buzz', group = 'Display')
@@ -58,26 +59,24 @@ align_txt_left = switch txt_align_left
     'Left'   => text.align_left
     'Center' => text.align_center
     'Right'  => text.align_right
+
 align_txt_right = switch txt_align_right
     'Left'   => text.align_left
     'Center' => text.align_center
     'Right'  => text.align_right
 
+// Calculation
 // ADR/ATR
 tf    = timeframe.period
 s     = syminfo.tickerid
 arp       = 100 * (ta.sma(high / low, adrp_len) - 1)
-adrp      = request.security(s, 'D', arp)
-atr       = request.security(s, 'D', ta.atr(atr_len))
+atr       = ta.atr(atr_len)
 atrp      = 100 * (atr/close)
-lod_dist  = request.security(s, 'D', 100 * (close - low) / atr)
-lod_price = request.security(s, 'D', low)
-
-// Volume calculation
+lod_dist  = 100 * (close - low) / atr
+lod_price = low
+// Volume
 vol   = request.security(s, tf, volume)
 ma    = ta.sma(vol, len)
-volDa = request.security(s, 'D', volume)
-maDa  = request.security(s, 'D', ta.sma(volDa, len))
 // 1) Relative Volume
 relVol = vol/ma*100
 // 2) Average Daily Vol
@@ -106,9 +105,9 @@ if(advdolDa >= 1000000 and advdolDa < 1000000000)
 if(advdolDa >= 1000000000)
     advdolDa := advdolDa/1000000000
     uVDoll := 'B'
+// Other parameters
 // 4)  Market Cap
-TSO = request.financial(s, 'TOTAL_SHARES_OUTSTANDING', 'FQ', ignore_invalid_symbol=true)
-MCap = TSO*closeDa
+MCap = request.financial(s, 'MARKET_CAP_BASIC', 'D')
 MCapCalc = MCap
 uM = ''
 if(MCap >= 1000 and MCap < 1000000)
@@ -130,7 +129,6 @@ floatPer = FFMCap/MCapCalc*100
 time_period = ((time_close  - time)     / 1000)
 time_passed = ((timenow     - time)     / 1000)
 time_left   = ((time_close  - timenow)  / 1000)
-
 volume_per_second = 0.0
 volume_projected  = float(volume)
 uP = ''
@@ -270,6 +268,8 @@ if (totalRsScore < sxth and totalRsScore >= svth)
     totalRsRating := f_attributePercentile(totalRsScore, sxth, svth, 9, 2, 0)
 
 // 11) Liquidity Cap (Based on 1% of MA Volume Length)
+volDa        = request.security(s, 'D', volume)
+maDa         = request.security(s, 'D', ta.sma(volDa, len))
 liquidityCap = request.security(s, 'D', maDa) * 0.01
 
 // 12) Up/Down Volume Ratio
@@ -287,7 +287,6 @@ distFromLow  = 100 * (closeDa/fiftyTwoWeekLow-1)
 
 // 14) Shares Float
 sharesFloat = request.financial(s, 'FLOAT_SHARES_OUTSTANDING', 'FY', ignore_invalid_symbol=true)
-plot(sharesFloat/1000000)
 uF = ''
 if(sharesFloat >= 1000 and sharesFloat < 1000000)
     sharesFloat := sharesFloat/1000
@@ -323,7 +322,7 @@ if barstate.islast and timeframe.period != 'W' and timeframe.period != 'M'
         table.cell_set_text_halign(t, 2, 3, text_halign = align_txt_right)  
     if show_adrp
         table.cell(t, 1, 4, 'ADR%', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 4, str.tostring(adrp, '0.00') + '%', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 4, str.tostring(arp, '0.00') + '%', text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 4, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 4, text_halign = align_txt_right)  
     if show_atrPer
@@ -357,12 +356,12 @@ if barstate.islast and timeframe.period != 'W' and timeframe.period != 'M'
         table.cell_set_text_halign(t, 1, 10, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 10, text_halign = align_txt_right) 
     if show_ADVS
-        table.cell(t, 1, 11, tfDaily ? 'Avg Dly $ Vol':'Avg $ Vol', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 1, 11, tfDaily ? 'Avg $ Vol':'Avg $ Vol', text_color=txt_col, text_size = size_tbl)
         table.cell(t, 2, 11, '$' + str.tostring(advdolDa, '0.00') + uVDoll, text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 11, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 11, text_halign = align_txt_right)  
     if show_ADV
-        table.cell(t, 1, 12, tfDaily ? 'Avg Dly Vol':'Avg Vol', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 1, 12, tfDaily ? 'Avg Vol':'Avg Vol', text_color=txt_col, text_size = size_tbl)
         table.cell(t, 2, 12, str.tostring(avgDaVol, '0.00') + uV, text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 12, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 12, text_halign = align_txt_right)  
@@ -408,3 +407,4 @@ if barstate.islast and timeframe.period != 'W' and timeframe.period != 'M'
         table.cell_set_text_halign(t, 2, 20, text_halign = align_txt_right)  
     table.merge_cells(t, 1, 19, 2, 19)
     table.merge_cells(t, 1, 20, 2, 20)
+    
