@@ -15,6 +15,7 @@ show_floatpercent = input(true, title='Show Float%', group = 'Display')
 show_adrp         = input(true, title='Show ADR%', group = 'Display')
 show_atrPer       = input(false, title='Show ATR%', group = 'Display')
 show_atr          = input(false, title='Show ATR', group = 'Display')
+show_ipo_date     = input(false, title='Show IPO Timer', group = 'Display')
 show_lod_dist     = input(true, title='Show LoD dist.', group = 'Display')
 show_lod_price    = input(true, title='Show LoD Price', group = 'Display')
 show_dist_high    = input(true, title='Show %dist of 52 We High', group = 'Display')
@@ -74,6 +75,8 @@ atr       = ta.atr(atr_len)
 atrp      = 100 * (atr/close)
 lod_dist  = 100 * (close - low) / atr
 lod_price = low
+// IPO Date
+ipoSince = request.security(s, 'D', (bar_index+1)/252) // Compte le nbr de bars totale du graph
 // Volume
 vol   = request.security(s, tf, volume)
 ma    = ta.sma(vol, len)
@@ -107,7 +110,12 @@ if(advdolDa >= 1000000000)
     uVDoll := 'B'
 // Other parameters
 // 4)  Market Cap
-MCap = request.financial(s, 'MARKET_CAP_BASIC', 'D')
+MCap = request.financial(s, 'MARKET_CAP_BASIC', 'D', ignore_invalid_symbol=true)
+// Case where 'MARKET_CAP_BASIC' returns NaN
+TSO = request.financial(s, 'TOTAL_SHARES_OUTSTANDING', 'FQ', ignore_invalid_symbol=true)
+if na(MCap)
+    MCap := TSO*closeDa
+    
 MCapCalc = MCap
 uM = ''
 if(MCap >= 1000 and MCap < 1000000)
@@ -300,7 +308,7 @@ if(sharesFloat >= 1000000000)
 
 // Display Table
 tfDaily = timeframe.isdaily
-table t = table.new(tablePos, 3, 21, bgcolor=bg_col)
+table t = table.new(tablePos, 3, 23, bgcolor=bg_col)
 if barstate.islast
     if show_empty_row
         table.cell(t, 1, 0, '')
@@ -334,77 +342,82 @@ if barstate.islast
         table.cell(t, 1, 6, 'ATR', text_color=txt_col, text_size = size_tbl)
         table.cell(t, 2, 6, str.tostring(atr, '0.00'), text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 6, text_halign = align_txt_left)
-        table.cell_set_text_halign(t, 2, 6, text_halign = align_txt_right)  
-    if show_lod_dist
-        table.cell(t, 1, 7, 'LoD dist.', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 7, str.tostring(lod_dist, '0') + '%', text_color=txt_col, text_size = size_tbl)
+        table.cell_set_text_halign(t, 2, 6, text_halign = align_txt_right)
+    if show_ipo_date
+        table.cell(t, 1, 7, 'IPO Timer', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 7, str.tostring(ipoSince, '0.00') + 'Y', text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 7, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 7, text_halign = align_txt_right)
-    if show_lod_price
-        table.cell(t, 1, 8, 'LoD Price', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 8, str.tostring(lod_price, '0.00'), text_color=txt_col, text_size = size_tbl)
+    if show_lod_dist
+        table.cell(t, 1, 8, 'LoD dist.', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 8, str.tostring(lod_dist, '0') + '%', text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 8, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 8, text_halign = align_txt_right)
-    if show_dist_high
-        table.cell(t, 1, 9, 'Off 52W High', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 9, str.tostring(distFromHigh, '0.0') + '%', text_color=txt_col, text_size = size_tbl)
+    if show_lod_price
+        table.cell(t, 1, 9, 'LoD Price', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 9, str.tostring(lod_price, '0.00'), text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 9, text_halign = align_txt_left)
-        table.cell_set_text_halign(t, 2, 9, text_halign = align_txt_right) 
-    if show_dist_low
-        table.cell(t, 1, 10, 'Above 52W Low', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 10, '+' + str.tostring(distFromLow, '0.0') + '%', text_color=txt_col, text_size = size_tbl)
+        table.cell_set_text_halign(t, 2, 9, text_halign = align_txt_right)
+    if show_dist_high
+        table.cell(t, 1, 10, 'Off 52W High', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 10, str.tostring(distFromHigh, '0.0') + '%', text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 10, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 10, text_halign = align_txt_right) 
-    if show_ADVS
-        table.cell(t, 1, 11, tfDaily ? 'Avg $ Vol':'Avg $ Vol', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 11, '$' + str.tostring(advdolDa, '0.00') + uVDoll, text_color=txt_col, text_size = size_tbl)
+    if show_dist_low
+        table.cell(t, 1, 11, 'Above 52W Low', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 11, '+' + str.tostring(distFromLow, '0.0') + '%', text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 11, text_halign = align_txt_left)
-        table.cell_set_text_halign(t, 2, 11, text_halign = align_txt_right)  
-    if show_ADV
-        table.cell(t, 1, 12, tfDaily ? 'Avg Vol':'Avg Vol', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 12, str.tostring(avgDaVol, '0.00') + uV, text_color=txt_col, text_size = size_tbl)
+        table.cell_set_text_halign(t, 2, 11, text_halign = align_txt_right) 
+    if show_ADVS
+        table.cell(t, 1, 12, tfDaily ? 'Avg $ Vol':'Avg $ Vol', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 12, '$' + str.tostring(advdolDa, '0.00') + uVDoll, text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 12, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 12, text_halign = align_txt_right)  
-    if show_projectedVol
-        table.cell(t, 1, 13, 'Proj. Vol', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 13, str.tostring(volume_projected, '0.00') + uP, text_color=txt_col, text_size = size_tbl)
+    if show_ADV
+        table.cell(t, 1, 13, tfDaily ? 'Avg Vol':'Avg Vol', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 13, str.tostring(avgDaVol, '0.00') + uV, text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 13, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 13, text_halign = align_txt_right)  
-    if show_relVol
-        table.cell(t, 1, 14, 'Rel. Vol', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 14, str.tostring(relVol, '0') + '%', text_color=txt_col, text_size = size_tbl)
+    if show_projectedVol
+        table.cell(t, 1, 14, 'Proj. Vol', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 14, str.tostring(volume_projected, '0.00') + uP, text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 14, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 14, text_halign = align_txt_right)  
-    if show_volBuzz
-        table.cell(t, 1, 15, 'Vol. Buzz', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 15, str.tostring(volBuzz, '0') + '%', text_color=txt_col, text_size = size_tbl)
+    if show_relVol
+        table.cell(t, 1, 15, 'Rel. Vol', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 15, str.tostring(relVol, '0') + '%', text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 15, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 15, text_halign = align_txt_right)  
-    if show_UDratio
-        table.cell(t, 1, 16, 'U/D Ratio', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 16, str.tostring(upDnVolRatio, '0.0'), text_color=txt_col, text_size = size_tbl)
-        table.cell_set_text_halign(t, 1, 16, text_halign = align_txt_left)
-        table.cell_set_text_halign(t, 2, 16, text_halign = align_txt_right)  
-    if show_rs_rating
-        table.cell(t, 1, 17, 'RS Rating', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 17, tfDaily ? str.tostring(totalRsRating, '0.0'):'-', text_color=txt_col, text_size = size_tbl)
+    if show_volBuzz
+        table.cell(t, 1, 17, 'Vol. Buzz', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 17, str.tostring(volBuzz, '0') + '%', text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 17, text_halign = align_txt_left)
-        table.cell_set_text_halign(t, 2, 17, text_halign = align_txt_right)   
-    if show_liqCap
-        table.cell(t, 1, 18, 'Liquidity Cap (Shares)', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 2, 18, str.tostring(liquidityCap, '0'), text_color=txt_col, text_size = size_tbl)
+        table.cell_set_text_halign(t, 2, 17, text_halign = align_txt_right)  
+    if show_UDratio
+        table.cell(t, 1, 18, 'U/D Ratio', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 18, str.tostring(upDnVolRatio, '0.0'), text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 18, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 18, text_halign = align_txt_right)  
-    if show_sector
-        table.cell(t, 0, 19, 'Sector', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 1, 19, sector, text_color=txt_col, text_size = size_tbl)
+    if show_rs_rating
+        table.cell(t, 1, 19, 'RS Rating', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 19, tfDaily ? str.tostring(totalRsRating, '0.0'):'-', text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 19, text_halign = align_txt_left)
-        table.cell_set_text_halign(t, 2, 19, text_halign = align_txt_right)  
-    if show_ind
-        table.cell(t, 0, 20, 'Ind. Grp', text_color=txt_col, text_size = size_tbl)
-        table.cell(t, 1, 20, industryGrp, text_color=txt_col, text_size = size_tbl)
+        table.cell_set_text_halign(t, 2, 19, text_halign = align_txt_right)   
+    if show_liqCap
+        table.cell(t, 1, 20, 'Liquidity Cap (Shares)', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 2, 20, str.tostring(liquidityCap, '0'), text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 1, 20, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 2, 20, text_halign = align_txt_right)  
-    table.merge_cells(t, 1, 19, 2, 19)
-    table.merge_cells(t, 1, 20, 2, 20)
+    if show_sector
+        table.cell(t, 0, 21, 'Sector', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 1, 21, sector, text_color=txt_col, text_size = size_tbl)
+        table.cell_set_text_halign(t, 1, 21, text_halign = align_txt_left)
+        table.cell_set_text_halign(t, 2, 21, text_halign = align_txt_right)  
+    if show_ind
+        table.cell(t, 0, 22, 'Ind. Grp', text_color=txt_col, text_size = size_tbl)
+        table.cell(t, 1, 22, industryGrp, text_color=txt_col, text_size = size_tbl)
+        table.cell_set_text_halign(t, 1, 22, text_halign = align_txt_left)
+        table.cell_set_text_halign(t, 2, 22, text_halign = align_txt_right)  
+    table.merge_cells(t, 1, 21, 2, 21)
+    table.merge_cells(t, 1, 22, 2, 22)
     
