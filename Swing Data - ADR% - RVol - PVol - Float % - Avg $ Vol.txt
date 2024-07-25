@@ -301,7 +301,7 @@ if(sharesFloat >= 1000000000)
 // Display Table
 tfDaily = timeframe.isdaily
 table t = table.new(tablePos, 3, 21, bgcolor=bg_col)
-if barstate.islast and timeframe.period != 'W' and timeframe.period != 'M'
+if barstate.islast
     if show_empty_row
         table.cell(t, 1, 0, '')
         table.cell(t, 2, 0, '')
