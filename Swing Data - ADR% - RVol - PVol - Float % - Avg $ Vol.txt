@@ -110,11 +110,8 @@ if(advdolDa >= 1000000000)
     uVDoll := 'B'
 // Other parameters
 // 4)  Market Cap
-MCap = request.financial(s, 'MARKET_CAP_BASIC', 'D', ignore_invalid_symbol=true)
-// Case where 'MARKET_CAP_BASIC' returns NaN
-TSO = request.financial(s, 'TOTAL_SHARES_OUTSTANDING', 'FQ', ignore_invalid_symbol=true)
-if na(MCap)
-    MCap := TSO*closeDa
+totalShares = syminfo.shares_outstanding_total
+MCap = totalShares * close
     
 MCapCalc = MCap
 uM = ''
@@ -128,7 +125,7 @@ if(MCap >= 1000000000)
     MCap := MCap/1000000000
     uM := 'B'
 // 5) Float%
-FSO      = request.financial(s, 'FLOAT_SHARES_OUTSTANDING', 'FY', ignore_invalid_symbol=true)
+FSO      = syminfo.shares_outstanding_float
 FFMCap   = FSO * closeDa
 floatPer = FFMCap/MCapCalc*100
 // 6) Projected Volume
@@ -294,7 +291,7 @@ distFromHigh = 100 * (closeDa/fiftyTwoWeekHigh-1)
 distFromLow  = 100 * (closeDa/fiftyTwoWeekLow-1)
 
 // 14) Shares Float
-sharesFloat = request.financial(s, 'FLOAT_SHARES_OUTSTANDING', 'FY', ignore_invalid_symbol=true)
+sharesFloat = syminfo.shares_outstanding_float
 uF = ''
 if(sharesFloat >= 1000 and sharesFloat < 1000000)
     sharesFloat := sharesFloat/1000
