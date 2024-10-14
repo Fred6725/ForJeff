@@ -110,8 +110,11 @@ if(advdolDa >= 1000000000)
     uVDoll := 'B'
 // Other parameters
 // 4)  Market Cap
-totalShares = syminfo.shares_outstanding_total
-MCap = totalShares * close
+MCap = request.financial(s, 'MARKET_CAP_BASIC', 'D')
+
+if na(MCap)
+    totalShares = syminfo.shares_outstanding_total
+    MCap := totalShares * close
     
 MCapCalc = MCap
 uM = ''
