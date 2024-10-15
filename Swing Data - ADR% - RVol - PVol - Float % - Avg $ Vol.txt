@@ -421,8 +421,8 @@ if barstate.islast
         table.cell(t, 0, 22, industryGrp, text_color=txt_col, text_size = size_tbl)
         table.cell_set_text_halign(t, 0, 22, text_halign = align_txt_left)
         table.cell_set_text_halign(t, 1, 22, text_halign = align_txt_right) 
-    table.merge_cells(t, 0, 21, 2, 21)
-    table.merge_cells(t, 0, 22, 2, 22)
+    table.merge_cells(t, 0, 21, 1, 21)
+    table.merge_cells(t, 0, 22, 1, 22)
     if add_empty_row_dn > 0
         table.cell(t, 0, 23, '', text_color=txt_col, text_size = size_tbl)
     if add_empty_row_dn > 1
