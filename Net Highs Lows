@@ -30,9 +30,9 @@ ftWeeksLowsAMEX 			= request.security('LOWA', timeframe.period, close) // 52 Wee
 
 // Inputs
 // Exchanges Selection
-NASDAQ = input(true,  'NASDAQ', inline='1', group='INDEXES TO INCLUDE')
-NYSE   = input(false, 'NYSE',   inline='1', group='INDEXES TO INCLUDE')
-AMEX   = input(false, 'AMEX',   inline='1', group='INDEXES TO INCLUDE')
+NASDAQ = input(true,  'NASDAQ', inline='1', group='INDEXES')
+NYSE   = input(false, 'NYSE',   inline='1', group='INDEXES')
+AMEX   = input(false, 'AMEX',   inline='1', group='INDEXES')
 // Period
 i_period    			= input.string('52 WEEKS', title='Period', options=['1 MONTH','3 MONTHS','52 WEEKS'], group='PERIOD')
 i_plotBoth  			= input(false, title='Displays Highs and Lows Separately')
