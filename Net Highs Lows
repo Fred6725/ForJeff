@@ -1,5 +1,5 @@
 // This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
-// © jfsrevg
+// © Fred6724
 
 //@version=5
 indicator(title='Title to find', overlay=false)
@@ -34,7 +34,7 @@ NASDAQ = input(true,  'NASDAQ', inline='1', group='INDEXES TO INCLUDE')
 NYSE   = input(false, 'NYSE',   inline='1', group='INDEXES TO INCLUDE')
 AMEX   = input(false, 'AMEX',   inline='1', group='INDEXES TO INCLUDE')
 // Period
-i_period    			= input.string('52 WEEKS', title='Net Highs/Low Period', options=['1 MONTH','3 MONTHS','52 WEEKS'], group='PERIOD')
+i_period    			= input.string('52 WEEKS', title='Period', options=['1 MONTH','3 MONTHS','52 WEEKS'], group='PERIOD')
 i_plotBoth  			= input(false, title='Displays Highs and Lows Separately')
 // Adding possibility to custom colors with transparancy on the two last
 i_upColor   			= input(color.green, title='Up')
@@ -43,8 +43,8 @@ i_dnColor   			= input(color.red,   title='Down')
 // i_negBackgroundColor	= input(color.rgb(255, 82, 82, 70), title='Background Color Down')
 // Table
 i_plotTable 			= input(false, title='Specifies the number of Highs/Lows in a table', group='Table')
-i_tableSize 			= input.string('Normal', title='Table Size', options=['Tiny','Small','Normal', 'Large'], group='Table')
-i_posTable              = input.string(defval='Bottom Left', title='Table Position', options=['Top Left','Top Right','Middle Left' ,'Middle Right','Bottom Left' ,'Bottom Right'], group='Table')
+i_tableSize 			= input.string('Normal', title='Size', options=['Tiny','Small','Normal', 'Large'], group='Table')
+i_posTable              = input.string(defval='Bottom Left', title='Position', options=['Top Left','Top Right','Middle Left' ,'Middle Right','Bottom Left' ,'Bottom Right'], group='Table')
 
 // Switch Table Size
 tableSize = switch i_tableSize
