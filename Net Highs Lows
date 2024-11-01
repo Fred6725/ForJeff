@@ -1,0 +1,146 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © jfsrevg
+
+//@version=5
+indicator(title='Title to find', overlay=false)
+
+// Use integrated tickers that monitors Net New Highs & Net New Lows
+// 1 Month Highs/Lows
+oneMonthNewHighsNASDAQ 		= request.security('M1HQ', timeframe.period, close) // 1 month High NASDAQ
+oneMonthNewHighsNYSE 		= request.security('M1HN', timeframe.period, close) // 1 month High NYSE
+oneMonthNewHighsAMEX 		= request.security('M1HA', timeframe.period, close) // 1 month High AMEX
+oneMonthNewLowsNASDAQ 		= request.security('M1LQ', timeframe.period, close) // 1 month Low NASDAQ
+oneMonthNewLowsNYSE 		= request.security('M1LN', timeframe.period, close) // 1 month Low NYSE
+oneMonthNewLowsAMEX 		= request.security('M1LA', timeframe.period, close) // 1 month Low AMEX
+// 3 Months Highs/Lows
+threeMonthNewHighsNASDAQ 	= request.security('M3HQ', timeframe.period, close) // 3 month High NASDAQ
+threeMonthNewHighsNYSE 		= request.security('M3HN', timeframe.period, close) // 3 month High NYSE
+threeMonthNewHighsAMEX 		= request.security('M3HA', timeframe.period, close) // 3 month High AMEX
+threeMonthNewLowsNASDAQ 	= request.security('M3LQ', timeframe.period, close) // 3 month Low NASDAQ
+threeMonthNewLowsNYSE 		= request.security('M3LN', timeframe.period, close) // 3 month Low NYSE
+threeMonthNewLowsAMEX 		= request.security('M3LA', timeframe.period, close) // 3 month Low AMEX
+// Net Highs/Lows
+ftWeeksHighsNASDAQ 			= request.security('HIGQ', timeframe.period, close) // 52 Weeks High NASDAQ
+ftWeeksHighsNYSE 			= request.security('HIGN', timeframe.period, close) // 52 Weeks High NYSE
+ftWeeksHighsAMEX 			= request.security('HIGA', timeframe.period, close) // 52 Weeks High AMEX
+ftWeeksLowsNASDAQ 			= request.security('LOWQ', timeframe.period, close) // 52 Weeks Low NASDAQ
+ftWeeksLowsNYSE 			= request.security('LOWN', timeframe.period, close) // 52 Weeks Low NYSE
+ftWeeksLowsAMEX 			= request.security('LOWA', timeframe.period, close) // 52 Weeks Low AMEX
+
+
+// Inputs
+// Exchanges Selection
+NASDAQ = input(true,  'NASDAQ', inline='1', group='INDEXES TO INCLUDE')
+NYSE   = input(false, 'NYSE',   inline='1', group='INDEXES TO INCLUDE')
+AMEX   = input(false, 'AMEX',   inline='1', group='INDEXES TO INCLUDE')
+// Period
+i_period    			= input.string('52 WEEKS', title='Net Highs/Low Period', options=['1 MONTH','3 MONTHS','52 WEEKS'], group='PERIOD')
+i_plotBoth  			= input(false, title='Displays Highs and Lows Separately')
+// Adding possibility to custom colors with transparancy on the two last
+i_upColor   			= input(color.green, title='Up')
+i_dnColor   			= input(color.red,   title='Down')
+// i_posBackgroundColor 	= input(color.rgb(76, 175, 80, 70), title='Background Color Up')
+// i_negBackgroundColor	= input(color.rgb(255, 82, 82, 70), title='Background Color Down')
+// Table
+i_plotTable 			= input(false, title='Specifies the number of Highs/Lows in a table', group='Table')
+i_tableSize 			= input.string('Normal', title='Table Size', options=['Tiny','Small','Normal', 'Large'], group='Table')
+i_posTable              = input.string(defval='Bottom Left', title='Table Position', options=['Top Left','Top Right','Middle Left' ,'Middle Right','Bottom Left' ,'Bottom Right'], group='Table')
+
+// Switch Table Size
+tableSize = switch i_tableSize
+    'Tiny'    => size.tiny
+    'Small'   => size.small
+    'Normal'  => size.normal
+    'Large'   => size.large
+
+// Switch Table Position
+posTable = switch i_posTable
+    'Top Left'    	=> position.top_left
+    'Top Right'  	=> position.top_right
+    'Middle Left'   => position.middle_left
+    'Middle Right'  => position.middle_right
+    'Bottom Left'   => position.bottom_left
+    'Bottom Right'  => position.bottom_right
+
+
+// User defines which exchanges and period he will visualises and we adapt the correct variables
+float highsNASDAQ	= 0
+float highsNYSE		= 0
+float highsAMEX		= 0
+float lowsNASDAQ	= 0
+float lowsNYSE		= 0
+float lowsAMEX		= 0
+// 1 MONTH
+if (i_period == '1 MONTH')
+    highsNASDAQ	:= NASDAQ ? oneMonthNewHighsNASDAQ  :0
+    highsNYSE	:= NYSE   ? oneMonthNewHighsNYSE 	:0
+    highsAMEX	:= AMEX   ? oneMonthNewHighsAMEX 	:0
+    lowsNASDAQ	:= NASDAQ ? oneMonthNewLowsNASDAQ 	:0
+    lowsNYSE	:= NYSE   ? oneMonthNewLowsNYSE 	:0
+    lowsAMEX	:= AMEX   ? oneMonthNewLowsAMEX 	:0
+// 3 MONTHS
+if (i_period == '3 MONTHS')
+    highsNASDAQ	:= NASDAQ ? threeMonthNewHighsNASDAQ:0
+    highsNYSE	:= NYSE   ? threeMonthNewHighsNYSE 	:0
+    highsAMEX	:= AMEX   ? threeMonthNewHighsAMEX 	:0
+    lowsNASDAQ	:= NASDAQ ? threeMonthNewLowsNASDAQ :0
+    lowsNYSE	:= NYSE   ? threeMonthNewLowsNYSE 	:0
+    lowsAMEX	:= AMEX   ? threeMonthNewLowsAMEX 	:0
+// 52 WEEKS
+if (i_period == '52 WEEKS')
+    highsNASDAQ	:= NASDAQ ? ftWeeksHighsNASDAQ		:0
+    highsNYSE	:= NYSE   ? ftWeeksHighsNYSE		:0
+    highsAMEX	:= AMEX   ? ftWeeksHighsAMEX		:0
+    lowsNASDAQ	:= NASDAQ ? ftWeeksLowsNASDAQ		:0
+    lowsNYSE	:= NYSE   ? ftWeeksLowsNYSE			:0
+    lowsAMEX	:= AMEX   ? ftWeeksLowsAMEX			:0
+
+// Calculation with every choice made
+highAndLows	= highsNASDAQ + highsNYSE  + highsAMEX - lowsNASDAQ - lowsNYSE - lowsAMEX
+highs 		= highsNYSE   + highsAMEX  + highsNASDAQ
+lows 		= - lowsNYSE  - lowsNASDAQ - lowsAMEX
+
+
+
+
+
+// This part maybe is to close for Mat Caruso script?
+// // Adding background color if 3 columns in a row are positive or negative
+// // Conditions
+// condGreen = highAndLows > 0 and highAndLows[1] > 0 and highAndLows[2] > 0 ? true:false
+// condRed   = highAndLows < 0 and highAndLows[1] < 0 and highAndLows[2] < 0 ? true:false
+
+// Background Color
+// // Color
+// bgcolor(condGreen ? i_posBackgroundColor:condRed ? i_negBackgroundColor:na)
+
+
+
+// Color for Positive or Negatiev value for the display
+mycolor   = highAndLows > 0 ? i_upColor:i_dnColor
+
+//Output
+plot(i_plotBoth ? na:highAndLows, title='New Highs - New Lows', color = mycolor, style=plot.style_columns, linewidth=2)
+//Plot separatly
+plot(i_plotBoth ?highs:na, color=i_upColor, style=plot.style_columns, linewidth=2)
+plot(i_plotBoth ?lows:na, color=i_dnColor, style=plot.style_columns, linewidth=2)
+
+
+// Display the Table
+var table newHighLowTable = table.new(posTable, 2, 2, border_width=1, border_color=color.rgb(209,212,219,0))
+
+//Function
+f_fillCell(_table, _column, _row, _value) =>
+    _c_color = color.rgb(54,58,69,0)
+    _transp = 0
+    _cellText = str.tostring(_value, '0')
+    table.cell(_table, _column, _row, _cellText, bgcolor=color.rgb(209,212,219,0), text_color=color.rgb(54,58,69,0),text_size=tableSize)
+    
+// Diplay
+if i_plotTable
+    // RIGHT
+    f_fillCell(newHighLowTable, 1, 0, highs)
+    f_fillCell(newHighLowTable, 1, 1, -lows)
+    // LEFT
+    table.cell(newHighLowTable,0,0, text='Highs', bgcolor=color.rgb(209,212,219,0), text_color=color.rgb(54,58,69,0),text_size=tableSize)
+    table.cell(newHighLowTable,0,1, text='Lows' , bgcolor=color.rgb(209,212,219,0), text_color=color.rgb(54,58,69,0),text_size=tableSize)
